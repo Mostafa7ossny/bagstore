@@ -22,11 +22,23 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Build IPA (No Codesign)
+      - name: Build Xcode Archive (no codesign)
         run: flutter build ipa --release --no-codesign
+
+      - name: Export IPA from archive
+        run: |
+          mkdir -p build/ios/ipa
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist ios/Runner/Info.plist \
+            -allowProvisioningUpdates || true
+
+      - name: List generated IPA
+        run: ls -R build/ios/ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-release
-          path: build/ios/ipa/*.ipa
+          path: build/ios/ipa
